@@ -22,3 +22,4 @@ with torch.no_grad():  # we're not training, so skip gradient tracking (saves me
 
 predicted_class = output.argmax().item()
 print(f"Predicted class index: {predicted_class}")
+

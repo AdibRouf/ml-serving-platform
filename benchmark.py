@@ -55,7 +55,8 @@ def run_benchmark(num_requests):
         job_ids = list(executor.map(lambda _: submit_job(), range(num_requests)))
 
     submit_done_time = time.time()
-    print(f"All {num_requests} requests submitted in {submit_done_time - start_time:.3f}s")
+    submission_time = submit_done_time - start_time
+    print(f"All {num_requests} requests submitted in {submission_time:.3f}s")
 
     # Poll for all results concurrently
     with ThreadPoolExecutor(max_workers=num_requests) as executor:
@@ -63,12 +64,14 @@ def run_benchmark(num_requests):
 
     end_time = time.time()
     total_time = end_time - start_time
+    processing_time = end_time - submit_done_time  # isolates inference from submission overhead
 
     print(f"\n--- Results ---")
     print(f"Total requests: {num_requests}")
-    print(f"Total time: {total_time:.3f}s")
-    print(f"Throughput: {num_requests / total_time:.2f} requests/sec")
-    print(f"Avg time per request: {total_time / num_requests * 1000:.2f} ms")
+    print(f"Submission phase: {submission_time:.3f}s  (client-side overhead, NOT inference)")
+    print(f"Processing phase: {processing_time:.3f}s  (this is the number that reflects batching/inference speed)")
+    print(f"Processing throughput: {num_requests / processing_time:.2f} requests/sec")
+    print(f"Overall throughput (incl. submission): {num_requests / total_time:.2f} requests/sec")
     print(f"Sample result: {results[0]}")
 
 
